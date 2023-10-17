@@ -40,7 +40,7 @@ const readDir = (dir) => {
     return fs.readdir(dir)
     .then((files) => {
       const filePng = files.filter((files.extname === ".png").lowerCase());
-      const filePath = filePng.map((file));
+      const filePath = filePng.map((files));
       resolve(filePath);
     })
       .catch((err) => {
