@@ -15,9 +15,6 @@
  * @param {string} pathOut
  * @return {promise}
  */
-const unzipper = require("unzipper");
-const fs = require("fs/promises");
-const path = require("path");
 
 const unzip = (pathIn, pathOut) => {
   return new Promise((resolve, reject) => {
@@ -63,7 +60,7 @@ const readDir = (dir) => {
  */
 
 const unzipper = require("unzipper");
-const fs = require("fs");
+const fs = require("fs/promises");
 const PNG = require("pngjs").PNG;
 const path = require("path");
 
