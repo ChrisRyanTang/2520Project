@@ -23,14 +23,18 @@ const { WriteStream, ReadStream } = require("fs");
 
 const unzip = (pathIn, pathOut) => {
   return new Promise((resolve, reject) => {
-    fs.createReadStream(pathIn)
-      .pipe(unzipper.Extract({ path: pathOut }))
-      .on("close", () => {
-        resolve("Extraction operation complete");
-      })
-      .on("error", () => {
-        reject();
-      });
+    const readStream = fs.createReadStream(pathIn);
+    const extract = unzipper.Extract({ path: pathOut });
+
+    readStream.pipe(extract);
+
+    extract.on("close", () => {
+      resolve("extracted");
+    });
+
+    extract.on("error", (err) => {
+      reject("not extracted", err);
+    });
   });
 };
 
@@ -43,19 +47,20 @@ const unzip = (pathIn, pathOut) => {
 
 const readDir = (dir) => {
   return new Promise((resolve, reject) => {
-      fs.readdir(dir)
-      .then((files) => {
-        const filePng = files.filter((files) => files.extname(files).toLowerCase() === ".png");
-        const filePath = filePng.map((files) => path.join(dir, files));
-        resolve(filePath);
-      })
-      .catch((err) => {
-        console.log("Something went wrong", err);
+    fs.readdir(dir, (err, files) => {
+      if (err) {
+        console.log("Error reading directory", err);
         reject(err);
-      });
+      } else {
+        const pngFiles = files.filter((file) => {
+          return path.extname(file).toLowerCase() === ".png";
+        });
+        const filePath = pngFiles.map((file) => path.join(dir, file));
+        resolve(filePath);
+      }
+    });
   });
 };
-
 /**
  * Description: Read in png file by given pathIn,
  * convert to grayscale and write to given pathOut
@@ -67,28 +72,34 @@ const readDir = (dir) => {
 
 const grayScale = (pathIn, pathOut) => {
   return new Promise((resolve, reject) => {
-    fs.createReadStream(pathIn)
-      .pipe(new PNG())
-      .on("parsed", function () {
-        for (let y = 0; y < this.height; y++) {
-          for (let x = 0; x < this.width; x++) {
-            const idx = (this.width * y + x) << 2;
-            const gray =
-              (this.data[idx] + this.data[idx + 1] + this.data[idx + 2]) / 3;
-            this.data[idx] = gray;
-            this.data[idx + 1] = gray;
-            this.data[idx + 2] = gray;
-          }
-        }
-        this.pack()
-          .pipe(fs.createWriteStream(pathOut))
-          .on("finish", () => {
-            resolve(pathOut);
-          })
-          .on("error", (err) => {
-            reject("Nothing", err);
-          });
+    const readStream = fs.createReadStream(pathIn);
+    const png = new PNG();
+
+    readStream.pipe(png);
+
+    png.on("parsed", function () {
+      for (let y = 0; y < this.height; y++) {
+        const idx = (this.width * y + x) << 2;
+        const gray =
+          (this.data[idx] + this.data[idx + 1] + this.data[idx + 2]) / 3;
+        this.data[idx] = gray;
+        this.data[idx + 1] = gray;
+        this.data[idx + 2] = gray;
+      }
+
+      const writeStream = fs.createWriteStream(pathOut);
+      png.pack().pipe(writeStream);
+
+      writeStream.on("finish", () => {
+        console.log("completed I hope");
+        resolve(pathOut);
       });
+
+      writeStream.on("error", (err) => {
+        console.log("UGGGGGGGH", err);
+        reject(err);
+      });
+    });
   });
 };
 
