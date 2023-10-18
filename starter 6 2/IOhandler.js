@@ -1,25 +1,25 @@
-/*
- * Project: Milestone 1
- * File Name: IOhandler.js
- * Description: Collection of functions for files input/output related operations
- *
- * Created Date:
- * Author:
- *
- */
+// /*
+//  * Project: Milestone 1
+//  * File Name: IOhandler.js
+//  * Description: Collection of functions for files input/output related operations
+//  *
+//  * Created Date:
+//  * Author:
+//  *
+//  */
 
-/**
- * Description: decompress file from given pathIn, write to given pathOut
- *
- * @param {string} pathIn
- * @param {string} pathOut
- * @return {promise}
- */
-const fs = require("fs/promises");
+// /**
+//  * Description: decompress file from given pathIn, write to given pathOut
+//  *
+//  * @param {string} pathIn
+//  * @param {string} pathOut
+//  * @return {promise}
+//  */
+const fs = require("fs");
 const unzipper = require("unzipper");
 const PNG = require("pngjs").PNG;
 const path = require("path");
-const { WriteStream } = require("fs");
+const { WriteStream, ReadStream } = require("fs");
 
 const unzip = (pathIn, pathOut) => {
   return new Promise((resolve, reject) => {
@@ -34,16 +34,16 @@ const unzip = (pathIn, pathOut) => {
   });
 };
 
-/**
- * Description: read all the png files from given directory and return Promise containing array of each png file path
- *
- * @param {string} path
- * @return {promise}
- */
+// /**
+//  * Description: read all the png files from given directory and return Promise containing array of each png file path
+//  *
+//  * @param {string} path
+//  * @return {promise}
+//  */
+
 const readDir = (dir) => {
   return new Promise((resolve, reject) => {
-    return fs
-      .readdir(dir)
+      fs.readdir(dir)
       .then((files) => {
         const filePng = files.filter((files) => files.extname(files).toLowerCase() === ".png");
         const filePath = filePng.map((files) => path.join(dir, files));
